@@ -4,89 +4,284 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rock Paper Scissors</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+            margin: 40px 0;
+        }
+
+        #intro {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+        }
+
+        #button-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #results {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        #score-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .score {
+            font-size: 18px;
+            color: #777;
+        }
+
+        #winner {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .choice-display {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .choice-display img {
+            width: 50px;
+            height: 50px;
+        }
+
+        .disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        #play-again-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        #play-again-button:hover {
+            background-color: #1e7e34;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
+    <div id="intro">
+        <h1>Rock Paper Scissors</h1>
+        <p>Click on your choice below to play five rounds. The final score and number of draws will be displayed at the end.</p>
+    </div>
+    <div id="button-container">
+        <button id="rockBtn">Rock</button>
+        <button id="paperBtn">Paper</button>
+        <button id="scissorsBtn">Scissors</button>
+    </div>
+    <div id="results">Ready when you are!</div>
+    <div id="choice-display" class="choice-display hidden">
+        <div>You chose: <img id="player-choice-img" src="" alt="Your Choice"></div>
+        <div>Computer chose: <img id="computer-choice-img" src="" alt="Computer Choice"></div>
+    </div>
+    <div id="score-container">
+        <div class="score" id="player-score">Player Wins: 0</div>
+        <div class="score" id="computer-score">Computer Wins: 0</div>
+        <div class="score" id="draws">Draws: 0</div>
+    </div>
+    <div id="winner"></div>
+    <button id="play-again-button" class="hidden">Play Again</button>
+
     <script>
-        // Function to generate a random integer between 0 and 2 (inclusive)
-        // representing the computer's choice: 0 for Rock, 1 for Paper, 2 for Scissors.
-        function getRandomZeroOneTwo() {
-            const randomNumber = Math.random() * 3; // Generates a random number between 0 (inclusive) and 3 (exclusive).
-            const integer = Math.floor(randomNumber); // Rounds the random number down to the nearest integer.
-            return integer;
-        }
+        const introDiv = document.getElementById('intro');
+        const resultsDiv = document.getElementById('results');
+        const choiceDisplayDiv = document.getElementById('choice-display');
+        const playerChoiceImg = document.getElementById('player-choice-img');
+        const computerChoiceImg = document.getElementById('computer-choice-img');
+        const playerScoreDiv = document.getElementById('player-score');
+        const computerScoreDiv = document.getElementById('computer-score');
+        const drawsDiv = document.getElementById('draws');
+        const winnerDiv = document.getElementById('winner');
+        const rockBtn = document.getElementById('rockBtn');
+        const paperBtn = document.getElementById('paperBtn');
+        const scissorsBtn = document.getElementById('scissorsBtn');
+        const buttonContainer = document.getElementById('button-container');
+        const playAgainButton = document.getElementById('play-again-button');
 
-        // Function to convert a numerical choice (0, 1, 2) to its string representation ("Rock", "Paper", "Scissors").
-        // It also handles invalid choices.
-        function convertChoice(choice) {
-            if (choice === 0) {
-                return "Rock";
-            } else if (choice === 1) {
-                return "Paper";
-            } else if (choice === 2) {
-                return "Scissors";
-            } else {
-                return "Invalid";
-            }
-        }
-
-        // Initialise the number of games played.
+        let playerScore = 0;
+        let computerScore = 0;
+        let draws = 0;
         let gamesPlayed = 0;
-        // Define the total number of games to be played.
         const numberOfGames = 5;
+        let gameActive = true;
 
-        // Start a loop that continues until the specified number of games has been played.
-        while (gamesPlayed < numberOfGames) {
-            // Generate a random choice for the computer (0, 1, or 2).
-            let computer_choice_num = getRandomZeroOneTwo();
+        const choices = {
+            "Rock": "https://wrpsa.com/wp-content/uploads/2021/08/rock-200x187.png",
+            "Paper": "https://wrpsa.com/wp-content/uploads/2021/08/paper-200x187.png",
+            "Scissors": "https://wrpsa.com/wp-content/uploads/2021/08/scissors-200x187.png"
+        };
 
-            // Prompt the player to make their choice, providing instructions for Rock, Paper, Scissors, and Quitting.
-            let player_choice_input = prompt(`Game ${gamesPlayed + 1} of ${numberOfGames}:\nMake your choice:\nRock (Press 0)\nPaper (Press 1)\nScissors (Press 2)\nQuit (Press Q/q)`);
+        function getRandomZeroOneTwo() {
+            return Math.floor(Math.random() * 3);
+        }
 
-            // Log the computer's numerical choice and the player's input to the console for debugging.
-            console.log("Computer chose (number): " + computer_choice_num);
-            console.log("Player chose (input): " + player_choice_input);
+        function convertChoice(choice) {
+            if (choice === 0) return "Rock";
+            if (choice === 1) return "Paper";
+            if (choice === 2) return "Scissors";
+            return "Invalid";
+        }
 
-            // Check if the player wants to quit (case-insensitive).
-            // The 'player_choice_input &&' part ensures that toUpperCase() is not called on a null value
-            // if the user cancels the prompt.
-            if (player_choice_input && player_choice_input.toUpperCase() === 'Q') {
-                alert("You've quit the game.");
-                break; // Exit the loop if the player quits.
+        function updateScoreDisplay() {
+            playerScoreDiv.textContent = `Player Wins: ${playerScore}`;
+            computerScoreDiv.textContent = `Computer Wins: ${computerScore}`;
+            drawsDiv.textContent = `Draws: ${draws}`;
+        }
+
+        function playRound(playerSelection) {
+            if (!gameActive) return;
+
+            const computerSelectionNum = getRandomZeroOneTwo();
+            const computerSelection = convertChoice(computerSelectionNum);
+
+            playerChoiceImg.src = choices[playerSelection];
+            computerChoiceImg.src = choices[computerSelection];
+            choiceDisplayDiv.classList.remove('hidden');
+
+            let roundResult = "";
+
+            if (playerSelection === computerSelection) {
+                draws++;
+                roundResult = `It's a draw! You both chose ${playerSelection}.`;
+            } else if (
+                (playerSelection === "Rock" && computerSelection === "Scissors") ||
+                (playerSelection === "Paper" && computerSelection === "Rock") ||
+                (playerSelection === "Scissors" && computerSelection === "Paper")
+            ) {
+                playerScore++;
+                roundResult = `You win! ${playerSelection} beats ${computerSelection}.`;
+            } else {
+                computerScore++;
+                roundResult = `You lose! ${computerSelection} beats ${playerSelection}.`;
             }
-            // Check if the player's input is not a valid number (0, 1, or 2).
-            else if (!(player_choice_input >= '0' && player_choice_input <= '2')) {
-                // Alert the player that their input was invalid and they lose.
-                alert("You typed an invalid number and poked yourself in the eye! You lose!\nComputer chose: " + convertChoice(computer_choice_num) + "\nYou chose: " + player_choice_input);
-                gamesPlayed++; // Increment the games played counter even for an invalid input.
-            }
-            // If the player's input is valid (0, 1, or 2).
-            else {
-                // Convert the player's input string to an integer.
-                let player_choice_num = parseInt(player_choice_input, 10);
-                // Convert the computer's numerical choice to its string representation.
-                let computer_choice_text = convertChoice(computer_choice_num);
-                // Convert the player's numerical choice to its string representation.
-                let player_choice_text = convertChoice(player_choice_num);
 
-                // Determine the winner based on the choices.
-                if (computer_choice_num === player_choice_num) {
-                    // It's a draw.
-                    alert(`Game ${gamesPlayed + 1}: It's a draw.\nComputer chose: ${computer_choice_text}\nYou chose: ${player_choice_text}`);
-                } else if ((player_choice_num - computer_choice_num + 3) % 3 === 1) {
-                    // Player wins (Rock beats Scissors, Paper beats Rock, Scissors beats Paper).
-                    alert(`Game ${gamesPlayed + 1}: You win!\nComputer chose: ${computer_choice_text}\nYou chose: ${player_choice_text}`);
-                } else {
-                    // Computer wins.
-                    alert(`Game ${gamesPlayed + 1}: You lose.\nComputer chose: ${computer_choice_text}\nYou chose: ${player_choice_text}`);
-                }
-                gamesPlayed++; // Increment the games played counter after a valid round.
+            resultsDiv.textContent = `Round ${gamesPlayed + 1}: ${roundResult}`;
+            updateScoreDisplay();
+            console.log("Player chose: " + playerSelection);
+            console.log("Computer chose: " + computerSelection);
+            console.log("Round Result: " + roundResult);
+            console.log("Score - Player: " + playerScore + ", Computer: " + computerScore + ", Draws: " + draws);
+
+            gamesPlayed++;
+
+            if (gamesPlayed === numberOfGames) {
+                gameActive = false;
+                disableButtons();
+                announceFinalWinner();
+                playAgainButton.classList.remove('hidden');
             }
         }
 
-        // After the loop finishes (either 5 games played or the player quit), display a thank you message.
-        if (gamesPlayed === numberOfGames) {
-            alert("Ta for playing 5 games!");
+        function announceFinalWinner() {
+            let finalMessage = `Final Result: `;
+            if (playerScore > computerScore) {
+                finalMessage += `You win the game!`;
+                winnerDiv.style.color = '#28a745'; // Green for win
+            } else if (computerScore > playerScore) {
+                finalMessage += `The computer wins the game!`;
+                winnerDiv.style.color = '#dc3545'; // Red for lose
+            } else {
+                finalMessage += `It's a tie game!`;
+                winnerDiv.style.color = '#007bff'; // Blue for tie
+            }
+            finalMessage += ` (Player: ${playerScore}, Computer: ${computerScore}, Draws: ${draws})`;
+            winnerDiv.textContent = finalMessage;
         }
+
+        function disableButtons() {
+            const buttons = buttonContainer.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.disabled = true;
+                button.classList.add('disabled');
+            });
+        }
+
+        function enableButtons() {
+            const buttons = buttonContainer.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.disabled = false;
+                button.classList.remove('disabled');
+            });
+        }
+
+        function resetGame() {
+            playerScore = 0;
+            computerScore = 0;
+            draws = 0;
+            gamesPlayed = 0;
+            gameActive = true;
+            resultsDiv.textContent = "Ready when you are!";
+            winnerDiv.textContent = "";
+            choiceDisplayDiv.classList.add('hidden');
+            updateScoreDisplay();
+            enableButtons();
+            playAgainButton.classList.add('hidden');
+        }
+
+        rockBtn.addEventListener('click', () => playRound("Rock"));
+        paperBtn.addEventListener('click', () => playRound("Paper"));
+        scissorsBtn.addEventListener('click', () => playRound("Scissors"));
+        playAgainButton.addEventListener('click', resetGame);
+
+        // Set initial text for the results div
+        resultsDiv.textContent = "Ready when you are!";
     </script>
 </body>
 </html>
