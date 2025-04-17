@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors</title>
+</head>
+<body>
+    <script>
+        // Function to generate a random integer between 0 and 2 (inclusive)
+        // representing the computer's choice: 0 for Rock, 1 for Paper, 2 for Scissors.
+        function getRandomZeroOneTwo() {
+            const randomNumber = Math.random() * 3; // Generates a random number between 0 (inclusive) and 3 (exclusive).
+            const integer = Math.floor(randomNumber); // Rounds the random number down to the nearest integer.
+            return integer;
+        }
+
+        // Function to convert a numerical choice (0, 1, 2) to its string representation ("Rock", "Paper", "Scissors").
+        // It also handles invalid choices.
+        function convertChoice(choice) {
+            if (choice === 0) {
+                return "Rock";
+            } else if (choice === 1) {
+                return "Paper";
+            } else if (choice === 2) {
+                return "Scissors";
+            } else {
+                return "Invalid";
+            }
+        }
+
+        // Initialise the number of games played.
+        let gamesPlayed = 0;
+        // Define the total number of games to be played.
+        const numberOfGames = 5;
+
+        // Start a loop that continues until the specified number of games has been played.
+        while (gamesPlayed < numberOfGames) {
+            // Generate a random choice for the computer (0, 1, or 2).
+            let computer_choice_num = getRandomZeroOneTwo();
+
+            // Prompt the player to make their choice, providing instructions for Rock, Paper, Scissors, and Quitting.
+            let player_choice_input = prompt(`Game ${gamesPlayed + 1} of ${numberOfGames}:\nMake your choice:\nRock (Press 0)\nPaper (Press 1)\nScissors (Press 2)\nQuit (Press Q/q)`);
+
+            // Log the computer's numerical choice and the player's input to the console for debugging.
+            console.log("Computer chose (number): " + computer_choice_num);
+            console.log("Player chose (input): " + player_choice_input);
+
+            // Check if the player wants to quit (case-insensitive).
+            // The 'player_choice_input &&' part ensures that toUpperCase() is not called on a null value
+            // if the user cancels the prompt.
+            if (player_choice_input && player_choice_input.toUpperCase() === 'Q') {
+                alert("You've quit the game.");
+                break; // Exit the loop if the player quits.
+            }
+            // Check if the player's input is not a valid number (0, 1, or 2).
+            else if (!(player_choice_input >= '0' && player_choice_input <= '2')) {
+                // Alert the player that their input was invalid and they lose.
+                alert("You typed an invalid number and poked yourself in the eye! You lose!\nComputer chose: " + convertChoice(computer_choice_num) + "\nYou chose: " + player_choice_input);
+                gamesPlayed++; // Increment the games played counter even for an invalid input.
+            }
+            // If the player's input is valid (0, 1, or 2).
+            else {
+                // Convert the player's input string to an integer.
+                let player_choice_num = parseInt(player_choice_input, 10);
+                // Convert the computer's numerical choice to its string representation.
+                let computer_choice_text = convertChoice(computer_choice_num);
+                // Convert the player's numerical choice to its string representation.
+                let player_choice_text = convertChoice(player_choice_num);
+
+                // Determine the winner based on the choices.
+                if (computer_choice_num === player_choice_num) {
+                    // It's a draw.
+                    alert(`Game ${gamesPlayed + 1}: It's a draw.\nComputer chose: ${computer_choice_text}\nYou chose: ${player_choice_text}`);
+                } else if ((player_choice_num - computer_choice_num + 3) % 3 === 1) {
+                    // Player wins (Rock beats Scissors, Paper beats Rock, Scissors beats Paper).
+                    alert(`Game ${gamesPlayed + 1}: You win!\nComputer chose: ${computer_choice_text}\nYou chose: ${player_choice_text}`);
+                } else {
+                    // Computer wins.
+                    alert(`Game ${gamesPlayed + 1}: You lose.\nComputer chose: ${computer_choice_text}\nYou chose: ${player_choice_text}`);
+                }
+                gamesPlayed++; // Increment the games played counter after a valid round.
+            }
+        }
+
+        // After the loop finishes (either 5 games played or the player quit), display a thank you message.
+        if (gamesPlayed === numberOfGames) {
+            alert("Ta for playing 5 games!");
+        }
+    </script>
+</body>
+</html>
